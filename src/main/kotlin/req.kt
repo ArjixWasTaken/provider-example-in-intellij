@@ -96,9 +96,23 @@ fun load(showLink: String): tvShow {
     )
 }
 
-// TODO: Make the loadLinks function
+fun loadLinks(episodeLink: String): List<Pair<String, String>> {
+    val iframeLink = Jsoup.parse(khttp.get(episodeLink).text).selectFirst("iframe")?.attr("src") ?: return listOf()
+
+    val html = khttp.get(fixUrl(iframeLink)).text
+    val soup = Jsoup.parse(html)
+
+    val servers = soup.select(".list-server-items > .linkserver").mapNotNull { li ->
+        if (!li?.attr("data-video").isNullOrEmpty()) {
+            Pair(li.text(), fixUrl(li.attr("data-video")))
+        } else {
+            null
+        }
+    }
+    return servers
+}
 
 fun main() {
-    val link = "https://vidembed.cc/videos/overlord-season-1-episode-13-player-vs-non-player-character"
-    println(load(link))
+    val link = "https://vidembed.cc/videos/the-circus-season-6-episode-9"
+    println(loadLinks(load(link).episodes[0].link))
 }
