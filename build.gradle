@@ -19,6 +19,7 @@ dependencies {
     compile group: 'khttp', name: 'khttp', version: '1.0.0'
     implementation "org.jetbrains.kotlin:kotlin-script-runtime:1.4.10"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
     implementation("org.jsoup:jsoup:1.11.3")
 }
 
