@@ -141,11 +141,31 @@ class VidEmbedProvider : MainAPI() {
                 null
             }
         }
+        servers.forEach {
+            if (it.first == "Beta Server") {
+                val downloadPage = Regex("""window\.open\(\s+"(.*?)",""").find(khttp.get(it.second).text)?.destructured?.component1()
 
-        extractorApis.forEach { extractor ->
-            servers.forEach {
-                if (extractor.name.equals(it.first, ignoreCase = true)) {
-                    extractor.getSafeUrl(it.second)?.forEach(callback)
+                if (downloadPage != null) {
+                    Jsoup.parse(khttp.get(downloadPage).text).select("a[download]").forEach { link ->
+                        val quality = Regex("""(\d+)P""").find(link.text())?.destructured?.component1()
+                        callback(
+                            ExtractorLink(
+                                "VidEmbed",
+                                if (quality != null) "VidEmbed - ${quality}p" else "VidEmbed - Auto",
+                                link.attr("href"),
+                                "",
+                                if (quality != null) getQualityFromName("$quality") else 0,
+                                link.attr("href").contains(".m3u8")
+                            )
+                        )
+                    }
+                }
+            } else {
+                for (extractor in extractorApis) {
+                    if (extractor.name.equals(it.first, ignoreCase = true)) {
+                        extractor.getSafeUrl(it.second)?.forEach(callback)
+                        break
+                    }
                 }
             }
         }
@@ -163,11 +183,7 @@ fun main() {
     val loadResponse = api.load(overlordSeasonOne.url)
     val episodeOne = (loadResponse as TvSeriesLoadResponse).episodes[0]
 
-    fun printlnCallback(extractorLink: ExtractorLink) {
-        println(extractorLink)
-    }
-
-    api.loadLinks(episodeOne.data, false, { _ -> Unit }) {
+    api.loadLinks(episodeOne.data, false, { _ -> }) {
         println(it)
     }
 }
