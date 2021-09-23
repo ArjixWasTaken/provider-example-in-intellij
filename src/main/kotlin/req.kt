@@ -55,7 +55,9 @@ class VidEmbedProvider : MainAPI() {
         val html = khttp.get(url).text
         val soup = Jsoup.parse(html)
 
-        val title = soup.selectFirst("h1,h2,h3").text()
+        var title = soup.selectFirst("h1,h2,h3").text()
+        title = if (!title.contains("Episode")) title else title.split("Episode")[0].trim()
+
         val description = soup.selectFirst(".post-entry")?.text()?.trim()
         var poster: String? = null
 
@@ -91,7 +93,7 @@ class VidEmbedProvider : MainAPI() {
         return when (tvType) {
             TvType.TvSeries -> {
                 TvSeriesLoadResponse(
-                    if (!title.contains("Episode")) title else title.split("Episode")[0].trim(),
+                    title,
                     url,
                     this.name,
                     tvType,
